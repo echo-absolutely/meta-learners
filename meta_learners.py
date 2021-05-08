@@ -65,6 +65,7 @@ def x_learner(data, x_vars, base_learner, base_learner_2, prop_classifier):
     data: pd.Dataframe
     base_learner: base learner used to get mu_0, mu_1
     base_learner_2: base learner of the second stage (used to get tau_0, tau_1)
+    prop_classifier: classifier to estimate propensity score
   Output:
     CATE estimate
   """
@@ -106,7 +107,6 @@ def x_learner(data, x_vars, base_learner, base_learner_2, prop_classifier):
   treatment_imp = imputed_data[imputed_data['W']==1][x_vars+['diff_w=1']]
 
   # Estimate tau_0, tau_1 using "base learners of the second stage"
-  # TODO: play around with model used, can be a different model for tau_0,tau_1
 
   # Fit on imputed data (treatment group)
   control_model = base_learner_2
@@ -120,7 +120,7 @@ def x_learner(data, x_vars, base_learner, base_learner_2, prop_classifier):
   # tau_1 is a CATE estimate fit to the treatment group
   tau_1 = control_model.predict(data[x_vars])
 
-  # estimate of propensity score
+  # Estimate propensity score
   m_prop = prop_classifier
   m_prop.fit(imputed_data[x_vars],imputed_data['W'])
   g = m_prop.predict_proba(data[x_vars])[:,1]
