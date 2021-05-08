@@ -120,7 +120,10 @@ def x_learner(data, x_vars, base_learner, base_learner_2=LinearRegression()):
   # tau_1 is a CATE estimate fit to the treatment group
   tau_1 = control_model.predict(data[x_vars])
 
-  g = pi_hat = data['W'].mean() # estimate of propensity score
+  # estimate of propensity score
+  m_prop = base_learner_2
+  m_prop.fit(data[x_vars],data['W'])
+  g = m_prop.predict_proba(x_test)[:,1]
 
   cate_x = g*tau_1 + (1-g)*tau_0
 
