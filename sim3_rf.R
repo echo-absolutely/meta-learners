@@ -63,6 +63,13 @@ for (n in n_range) {
   results_trf <- mean((cate_esti_trf - cate_true)^2)
   results$TRF[which(results$N == n)] <- results_trf
   
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
   
   m <- forestry(x = cbind(feature_train, w_train),
                 y = yobs_train,
@@ -83,6 +90,14 @@ for (n in n_range) {
   cate_est_srf <- predict(m,cbind(feature_test, w_train=1)) - predict(m,cbind(feature_test, w_train=0)) 
   results_srf <- mean((cate_est_srf - cate_true)^2)
   results$SRF[which(results$N == n)] <- results_srf
+  
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
   
   m_0_xrf <- forestry(x = X_0, 
                       y= yobs_0, 

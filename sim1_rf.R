@@ -13,12 +13,12 @@ filename <- paste0("sim1_rf.csv")
 
 for (n in n_range) {
   exp <- simulate_causal_experiment(ntrain = n,
-                                  ntest = 1000,
-                                  dim = 20,
-                                  pscore = "rct01",
-                                  mu0 = "semiLinear",
-                                  tau = "semiLinear")
-
+                                    ntest = 1000,
+                                    dim = 20,
+                                    pscore = "rct01",
+                                    mu0 = "semiLinear",
+                                    tau = "semiLinear")
+  
   feature_train <- exp$feat_tr
   w_train <- exp$W_tr
   yobs_train <- exp$Yobs_tr
@@ -63,57 +63,72 @@ for (n in n_range) {
   results_trf <- mean((cate_esti_trf - cate_true)^2)
   results$TRF[which(results$N == n)] <- results_trf
   
-
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
+  
   m <- forestry(x = cbind(feature_train, w_train),
-              y = yobs_train,
-              ntree = 1000,
-              replace = TRUE,
-              sample.fraction = 0.9,
-              mtry = ncol(feature_train),
-              nodesizeSpl = 1,
-              nodesizeAvg = 3,
-              nodesizeStrictSpl = 3,
-              nodesizeStrictAvg = 1,
-              nthread = 0,
-              splitrule = "variance",
-              splitratio = 1,
-              middleSplit = FALSE,
-              OOBhonest = TRUE)
-
+                y = yobs_train,
+                ntree = 1000,
+                replace = TRUE,
+                sample.fraction = 0.9,
+                mtry = ncol(feature_train),
+                nodesizeSpl = 1,
+                nodesizeAvg = 3,
+                nodesizeStrictSpl = 3,
+                nodesizeStrictAvg = 1,
+                nthread = 0,
+                splitrule = "variance",
+                splitratio = 1,
+                middleSplit = FALSE,
+                OOBhonest = TRUE)
+  
   cate_est_srf <- predict(m,cbind(feature_test, w_train=1)) - predict(m,cbind(feature_test, w_train=0)) 
   results_srf <- mean((cate_est_srf - cate_true)^2)
   results$SRF[which(results$N == n)] <- results_srf
   
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
+  
   m_0_xrf <- forestry(x = X_0, 
-                  y= yobs_0, 
-                  ntree = 1000, 
-                  replace = TRUE,  
-                  sample.fraction = 0.8, 
-                  mtry = round(ncol(X_0)*13/20), 
-                  nodesizeSpl = 2, 
-                  nodesizeAvg = 1, 
-                  nodesizeStrictSpl = 2, 
-                  nodesizeStrictAvg = 1, 
-                  nthread = 0, 
-                  splitrule = 'variance',  
-                  splitratio = 1, 
-                  middleSplit = TRUE, 
-                  OOBhonest = TRUE)
+                      y= yobs_0, 
+                      ntree = 1000, 
+                      replace = TRUE,  
+                      sample.fraction = 0.8, 
+                      mtry = round(ncol(X_0)*13/20), 
+                      nodesizeSpl = 2, 
+                      nodesizeAvg = 1, 
+                      nodesizeStrictSpl = 2, 
+                      nodesizeStrictAvg = 1, 
+                      nthread = 0, 
+                      splitrule = 'variance',  
+                      splitratio = 1, 
+                      middleSplit = TRUE, 
+                      OOBhonest = TRUE)
   m_1_xrf <- forestry(x = X_1, 
-                  y= yobs_1, 
-                  ntree = 1000, 
-                  replace = TRUE,  
-                  sample.fraction = 0.8, 
-                  mtry = round(ncol(X_0)*13/20), 
-                  nodesizeSpl = 2, 
-                  nodesizeAvg = 1, 
-                  nodesizeStrictSpl = 2, 
-                  nodesizeStrictAvg = 1, 
-                  nthread = 0, 
-                  splitrule = 'variance',  
-                  splitratio = 1, 
-                  middleSplit = TRUE, 
-                  OOBhonest = TRUE)
+                      y= yobs_1, 
+                      ntree = 1000, 
+                      replace = TRUE,  
+                      sample.fraction = 0.8, 
+                      mtry = round(ncol(X_0)*13/20), 
+                      nodesizeSpl = 2, 
+                      nodesizeAvg = 1, 
+                      nodesizeStrictSpl = 2, 
+                      nodesizeStrictAvg = 1, 
+                      nthread = 0, 
+                      splitrule = 'variance',  
+                      splitratio = 1, 
+                      middleSplit = TRUE, 
+                      OOBhonest = TRUE)
   r_0 <- predict(m_1_xrf, X_0) - yobs_0
   r_1 <- yobs_1 -  predict(m_0_xrf, X_1)
   
@@ -173,4 +188,3 @@ for (n in n_range) {
             file = filename,
             row.names = FALSE)
 }
-              

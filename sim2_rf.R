@@ -2,14 +2,14 @@ library(causalToolbox)
 library(Rforestry)
 library(BART)
 
-n_range <- c(2500, 5000, 7500, 10000)
+n_range <- c(10000)#2500, 5000, 7500, 10000)
 N <- 300000
 n_range <- n_range[which(n_range <= N)]
 results <- data.frame(N = n_range)
 results$XRF <- NA
 results$SRF <- NA
 results$TRF <- NA
-filename <- paste0("sim2_rf.csv")
+filename <- paste0("sim2_rf_3.csv")
 
 for (n in n_range) {
   exp <- simulate_causal_experiment(ntrain = n,
@@ -63,6 +63,13 @@ for (n in n_range) {
   results_trf <- mean((cate_esti_trf - cate_true)^2)
   results$TRF[which(results$N == n)] <- results_trf
   
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
   
   m <- forestry(x = cbind(feature_train, w_train),
                 y = yobs_train,
@@ -80,9 +87,17 @@ for (n in n_range) {
                 middleSplit = FALSE,
                 OOBhonest = TRUE)
   
-  cate_est_srf <- predict(m,cbind(feature_test, w_train=1)) - predict(m,cbind(feature_test, w_train=0)) 
+  cate_est_srf <- predict(m,cbind(feature_test, w_train = 1)) - predict(m,cbind(feature_test, w_train = 0)) 
   results_srf <- mean((cate_est_srf - cate_true)^2)
   results$SRF[which(results$N == n)] <- results_srf
+  
+  feature_train <- exp$feat_tr
+  w_train <- exp$W_tr
+  yobs_train <- exp$Yobs_tr
+  X_0 <- feature_train[w_train == 0,]
+  X_1 <- feature_train[w_train == 1,]
+  yobs_0 <- yobs_train[w_train == 0]
+  yobs_1 <- yobs_train[w_train == 1]
   
   m_0_xrf <- forestry(x = X_0, 
                       y= yobs_0, 
