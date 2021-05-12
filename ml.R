@@ -1,6 +1,6 @@
 library(causalToolbox)
 library(Rforestry)
-setwd("/scratch/fg746/mlproject")
+setwd("/scratch/fg746/meta-learners")
 gotv<-read.csv("gotv.csv")
 x_vars <- select(gotv, sex, g2000, g2002, p2000, p2002, p2004, age)
 X_0 <- x_vars[gotv$treatment == 0,]
