@@ -11,6 +11,7 @@ for (i in training_sizes){
   idx<- sample(nrow(gotv),i)
   train_data <- gotv[idx,]
   test_data<- gotv[-idx,]
+  w_train<-train_data$treatment
   results<- data.frame(indices = rownames(test_data))
   x_vars <- select(train_data, sex, g2000, g2002, p2000, p2002, p2004, age)
   X_0 <- x_vars[train_data$treatment == 0,]
@@ -51,10 +52,10 @@ for (i in training_sizes){
                   middleSplit = FALSE,
                   OOBhonest = TRUE)
   results<- cbind(results,TRF = (predict(m_1, x_vars_test) - predict(m_0, x_vars_test)))
+  print("T done")
   
-  
-  m <- forestry(x = cbind(x_vars, train_data$treatment),
-                y = gotv$voted,
+  m <- forestry(x = cbind(x_vars, w_train),
+                y = train_data$voted,
                 ntree = 1000,
                 replace = TRUE,
                 sample.fraction = 0.9,
@@ -68,8 +69,8 @@ for (i in training_sizes){
                 splitratio = 1,
                 middleSplit = FALSE,
                 OOBhonest = TRUE)
-  results<- cbind(results,SRF = (predict(m,cbind(x_vars_test, rep.int(1,nrow(test_data)))) - predict(m,cbind(x_vars_test, rep.int(0, nrow(test_data))))))
-  
+  results<- cbind(results,SRF = (predict(m,cbind(x_vars_test, w_train=1))) - predict(m,cbind(x_vars_test, w_train=0)))
+  print("S done")
   m_0_xrf <- forestry(x = X_0,
                       y= yobs_0,
                       ntree = 1000,
@@ -152,7 +153,7 @@ for (i in training_sizes){
   
   prop_scores <- predict(m_prop,x_vars_test)
   results<- cbind(results,XRF = (prop_scores * predict(m_tau_0, x_vars_test) + (1-prop_scores) * predict(m_tau_1,x_vars_test)))
-  
+  print("X done")
   write.csv(results,
             file = filename,
             row.names = FALSE)
