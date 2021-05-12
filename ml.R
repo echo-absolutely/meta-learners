@@ -1,5 +1,6 @@
-library(causalToolbox)
-library(Rforestry)
+library(causalToolbox,lib = "/home/fg746/R/4.0.4")
+library(Rforestry,lib = "/home/fg746/R/4.0.4")
+library(dpylr,lib = "/home/fg746/R/4.0.4")
 setwd("/scratch/fg746/meta-learners")
 gotv<-read.csv("gotv.csv")
 x_vars <- select(gotv, sex, g2000, g2002, p2000, p2002, p2004, age)
