@@ -1,6 +1,5 @@
-library(causalToolbox)
-library(Rforestry)
-library(BART)
+library(causalToolbox,lib = "/home/fg746/R/4.0.4")
+library(Rforestry,lib = "/home/fg746/R/4.0.4")
 
 n_range <- c(2500, 5000, 7500, 10000)
 N <- 300000
