@@ -9,7 +9,7 @@ X_1 <- x_vars[gotv$treatment == 1,]
 yobs_0 <- gotv$voted[gotv$treatment == 0]
 yobs_1 <- gotv$voted[gotv$treatment == 1]
 filename <- paste0("results.csv")
-
+w_train<-gotv$treatment
 m_0 <- forestry(x = X_0,
                 y= yobs_0,
                 ntree = 1000,
@@ -43,12 +43,12 @@ m_1 <- forestry(x = X_1,
 results<- data.frame(TRF = (predict(m_1, x_vars) - predict(m_0, x_vars)))
 
 
-m <- forestry(x = cbind(x_vars, gotv$treatment),
+m <- forestry(x = cbind(x_vars, w_train),
               y = gotv$voted,
               ntree = 1000,
               replace = TRUE,
               sample.fraction = 0.9,
-              mtry = ncol(feature_train),
+              mtry = ncol(x_vars),
               nodesizeSpl = 1,
               nodesizeAvg = 3,
               nodesizeStrictSpl = 3,
@@ -58,7 +58,7 @@ m <- forestry(x = cbind(x_vars, gotv$treatment),
               splitratio = 1,
               middleSplit = FALSE,
               OOBhonest = TRUE)
-results<- cbind(results,data.frame(SRF =  (predict(m,cbind(x_vars, rep.int(1, nrow(gotv)))) - predict(m,cbind(x_vars, rep.int(0, nrow(gotv)))))))
+results<- cbind(results,data.frame(SRF =  (predict(m,cbind(x_vars, w_train=1)) - predict(m,cbind(x_vars, w_train=0)))))
 
 
 m_0_xrf <- forestry(x = X_0,
@@ -130,7 +130,7 @@ m_prop <- forestry(x = x_vars,
                    ntree = 500,
                    replace = TRUE,
                    sample.fraction = 0.5,
-                   mtry = ncol(feature_train),
+                   mtry = ncol(x_vars),
                    nodesizeSpl = 11,
                    nodesizeAvg = 33,
                    nodesizeStrictSpl = 2,
