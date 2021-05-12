@@ -50,16 +50,15 @@ for (i in training_sizes){
                   splitratio = 1,
                   middleSplit = FALSE,
                   OOBhonest = TRUE)
+  results<- cbind(results,TRF = (predict(m_1, x_vars_test) - predict(m_0, x_vars_test)))
   
-  results<- cbind(results,data.frame(TRF = (predict(m_1, x_vars_test) - predict(m_0, x_vars_test))))
   
-  
-  m <- forestry(x = cbind(x_vars, gotv$treatment),
+  m <- forestry(x = cbind(x_vars, train_data$treatment),
                 y = gotv$voted,
                 ntree = 1000,
                 replace = TRUE,
                 sample.fraction = 0.9,
-                mtry = ncol(feature_train),
+                mtry = ncol(x_vars),
                 nodesizeSpl = 1,
                 nodesizeAvg = 3,
                 nodesizeStrictSpl = 3,
@@ -69,8 +68,7 @@ for (i in training_sizes){
                 splitratio = 1,
                 middleSplit = FALSE,
                 OOBhonest = TRUE)
-  
-  results<- cbind(results,data.frame(SRF = (predict(m,cbind(x_vars_test, rep.int(1, nrow(test_data)))) - predict(m,cbind(x_vars_test, rep.int(0, nrow(test_data)))))))
+  results<- cbind(results,SRF = (predict(m,cbind(x_vars_test, rep.int(1,nrow(test_data)))) - predict(m,cbind(x_vars_test, rep.int(0, nrow(test_data))))))
   
   m_0_xrf <- forestry(x = X_0,
                       y= yobs_0,
@@ -137,11 +135,11 @@ for (i in training_sizes){
                       OOBhonest = TRUE)
   
   m_prop <- forestry(x = x_vars,
-                     y= gotv$treatment,
+                     y= train_data$treatment,
                      ntree = 500,
                      replace = TRUE,
                      sample.fraction = 0.5,
-                     mtry = ncol(feature_train),
+                     mtry = ncol(x_vars),
                      nodesizeSpl = 11,
                      nodesizeAvg = 33,
                      nodesizeStrictSpl = 2,
@@ -153,8 +151,8 @@ for (i in training_sizes){
                      OOBhonest = TRUE)
   
   prop_scores <- predict(m_prop,x_vars_test)
-  results<- cbind(results,data.frame(XRF = (prop_scores * predict(m_tau_0, x_vars_test) + (1-prop_scores) * predict(m_tau_1,x_vars_test))))
-
+  results<- cbind(results,XRF = (prop_scores * predict(m_tau_0, x_vars_test) + (1-prop_scores) * predict(m_tau_1,x_vars_test)))
+  
   write.csv(results,
             file = filename,
             row.names = FALSE)
