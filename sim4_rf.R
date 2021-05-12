@@ -1,7 +1,7 @@
 library(causalToolbox,lib = "/home/fg746/R/4.0.4")
 library(Rforestry,lib = "/home/fg746/R/4.0.4")
 
-n_range <- c(2500, 5000, 7500, 10000)
+n_range <- c(5000, 10000, 20000, 100000, 200000, 300000)
 N <- 300000
 n_range <- n_range[which(n_range <= N)]
 results <- data.frame(N = n_range)
